@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import countryCodes from '../utils/CountryCode.json';
 
 const SignupForm = ({onSwitchToLogin }) => {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',

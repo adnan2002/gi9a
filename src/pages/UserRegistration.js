@@ -3,7 +3,7 @@ import SignupForm from '../components/SignupForm';
 import LoginForm from '../components/LoginForm';
 
 const UserRegistration = () => {
-    const [isLoginForm, setIsLoginForm] = useState(false);
+    const [isLoginForm, setIsLoginForm] = useState(true);
 
     const handleSwitchToLogin = () => {
         setIsLoginForm(true);

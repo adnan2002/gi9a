@@ -57,7 +57,7 @@ const Header = () => {
             onClick={handleCartClick}
         />
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 left-4 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              <span className="absolute top-0 right-0 left-4 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center select-none">
                 {cartCount}
               </span>
             )}
@@ -77,12 +77,12 @@ const Header = () => {
 
         <NavLink
         to="/"
-        className="hover:text-blue-600 hover:underline transition duration-300"
+        className="mr-4"
         style={({isActive}) =>{
             return isActive ? {color:'rgb(37 99 235)'} : {}
         }}
         >
-            <h1 className='hover:cursor-pointer'>
+            <h1 className=' hover:text-blue-600 hover:underline transition duration-300 hover:cursor-pointer text-2xl' style={{ fontFamily: "'Dancing Script', cursive" }}>
         Home
         </h1>
         </NavLink>
@@ -91,13 +91,13 @@ const Header = () => {
 
         <NavLink
         to="/shop"
-        className="ml-4  hover:text-blue-600 hover:underline transition duration-300"
+        className="ml-4"
         style={({isActive}) =>{
             return isActive ? {color:'rgb(37 99 235)'} : {}
         }}
         >
         
-            <h1 className='hover:cursor-pointer'>
+            <h1 className=' hover:text-blue-600 hover:underline transition duration-300 hover:cursor-pointer text-2xl' style={{ fontFamily: "'Dancing Script', cursive" }}>
         Shop
         </h1>
         
