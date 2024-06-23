@@ -1,12 +1,27 @@
+import React, { useState } from 'react';
+import SignupForm from '../components/SignupForm';
+import LoginForm from '../components/LoginForm';
 
-import SignupForm from "../components/SignupForm"
-const UserRegistration = ()=>{
+const UserRegistration = () => {
+    const [isLoginForm, setIsLoginForm] = useState(false);
+
+    const handleSwitchToLogin = () => {
+        setIsLoginForm(true);
+    };
+
+    const handleSwitchToSignup = () => {
+        setIsLoginForm(false);
+    };
+
     return (
-        <div className="flex items-center justify-center border-2" >
-            <SignupForm/>
+        <div className="flex items-center justify-center border-2">
+            {isLoginForm ? (
+                <LoginForm onSwitchToSignup={handleSwitchToSignup} />
+            ) : (
+                <SignupForm onSwitchToLogin={handleSwitchToLogin} />
+            )}
         </div>
-    )
-}
+    );
+};
 
-
-export default UserRegistration
+export default UserRegistration;

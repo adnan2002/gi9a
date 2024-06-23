@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import countryCodes from '../utils/CountryCode.json';
 
-const SignupForm = () => {
+const SignupForm = ({onSwitchToLogin }) => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
@@ -9,21 +10,43 @@ const SignupForm = () => {
         phone: '',
         email: '',
         password: '',
-        country: '',
+        country: 'Bahrain', // Default country is Bahrain
         address1: '',
         address2: '',
         city: '',
         state: '',
-        zip: ''
+        zip: '',
+        dialCode: '+973' // Default dial code for Bahrain
     });
+
+    const [countries, setCountries] = useState([]);
+    const [allowedCountries, setAllowedCountries] = useState([]);
+
+    useEffect(() => {
+        setCountries(countryCodes);
+        setAllowedCountries(countryCodes.filter(country =>
+            ['Saudi Arabia', 'Bahrain', 'United Kingdom', 'United States'].includes(country.name)
+        ));
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleDialCodeChange = (e) => {
+        const selectedDialCode = e.target.value;
+        setFormData({
+            ...formData,
+            dialCode: selectedDialCode,
+            phone: selectedDialCode // Initialize phone with the selected dial code
+        });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle form submission, such as sending data to the server
+        const phoneNumberWithDialCode = `${formData.dialCode}${formData.phone}`;
+        const formDataToSubmit = { ...formData, phone: phoneNumberWithDialCode };
+        console.log(formDataToSubmit);
     };
 
     return (
@@ -57,20 +80,40 @@ const SignupForm = () => {
                             />
                         </div>
                     </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 mb-2" htmlFor="email">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2" htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            value={formData.email}
+                            onChange={handleChange}
+                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" // Basic email validation regex
+                            required
+                        />
+                    </div>
+                    <div className="mb-4 flex items-center">
+                        <div className="mr-4">
+                            <label className="block text-gray-700 mb-2" htmlFor="dialCode">Dial Code</label>
+                            <select
+                                id="dialCode"
+                                name="dialCode"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                value={formData.email}
-                                onChange={handleChange}
-                                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" // Basic email validation regex
+                                value={formData.dialCode}
+                                onChange={handleDialCodeChange}
                                 required
-                            />
+                            >
+                                {countries.map(country => (
+                                    country.dialCodes && country.dialCodes.length > 0 && (
+                                        <option key={country.code} value={country.dialCodes[0]}>
+                                            {country.dialCodes[0]}
+                                        </option>
+                                    )
+                                ))}
+                            </select>
                         </div>
-                        <div className="mb-4">
+                        <div className="flex-grow">
                             <label className="block text-gray-700 mb-2" htmlFor="phone">Phone</label>
                             <input
                                 type="tel"
@@ -79,10 +122,11 @@ const SignupForm = () => {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                pattern="^\+?[1-9]\d{1,14}$" // Basic international phone number validation regex
+                                pattern="^[\d()]{5,}$"
                                 required
                             />
                         </div>
+                    </div>
                     <div className="mb-4">
                         <label className="block text-gray-700 mb-2" htmlFor="password">Password</label>
                         <input
@@ -132,6 +176,23 @@ const SignupForm = () => {
                             required
                         />
                     </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 mb-2" htmlFor="country">Country</label>
+                        <select
+                            id="country"
+                            name="country"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            value={formData.country}
+                            onChange={handleChange}
+                            required
+                        >
+                            {allowedCountries.map(country => (
+                                <option key={country.code} value={country.name}>
+                                    {country.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     {formData.country === 'United States' && (
                         <div className="mb-4">
                             <label className="block text-gray-700 mb-2" htmlFor="state">State/Province</label>
@@ -158,33 +219,16 @@ const SignupForm = () => {
                             required
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2" htmlFor="country">Country</label>
-                        <select
-                            id="country"
-                            name="country"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                            value={formData.country}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Select a country</option>
-                            <option value="United States">United States</option>
-                            <option value="Canada">Canada</option>
-                            <option value="United Kingdom">United Kingdom</option>
-                            <option value="Australia">Australia</option>
-                            {/* Add more options as needed */}
-                        </select>
-                    </div>
                     <div className="mb-6">
-                        <button type="submit" className="w-full bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 transition duration-300">Sign Up</button>
+                        <button type="submit" className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Sign Up</button>
                     </div>
                     <div className="text-center">
                         <p className="text-gray-700">
-                            Already have an account? <span onClick={() => navigate('/login')} className="text-blue-500 hover:underline cursor-pointer">Login</span>
+                            Already have an account? <span onClick={onSwitchToLogin} className="text-blue-500 hover:underline cursor-pointer">Login</span>
                         </p>
                     </div>
                 </form>
+
             </div>
         </div>
     );
