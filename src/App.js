@@ -3,6 +3,7 @@ import Shop from "./pages/Shop";
 import Header from "./components/Header";
 import UserRegistration from "./pages/UserRegistration";
 import ForgotPassword from "./pages/ForgotPassword";
+import Footer from "./components/Footer";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 
@@ -20,6 +21,7 @@ function App() {
           {/* <Route path="/404" component={NotFound} />
           <Redirect to="/404" /> */}
         </Routes>
+        <Footer/>
       </div>
     </Router>
   );
