@@ -35,8 +35,8 @@ const Header = () => {
 
 
         <div className="text-center">
-          <p className="font-bold text-black hover:underline cursor-pointer">
-            Free delivery worldwide! For more information click here
+          <p className="font-bold text-black select-none">
+            Free delivery worldwide!
           </p>
         </div>
 

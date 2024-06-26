@@ -59,6 +59,7 @@ const Product = () => {
         <div>
           <h2 className="text-3xl font-bold mb-4">{product.title}</h2>
           <ProductForm onSubmit={handleFormSubmit} />
+          <p className='text-lg font-bold mb-4 mt-4'>{product.price.toFixed(2)} SAR</p>
         </div>
       </div>
     )}
