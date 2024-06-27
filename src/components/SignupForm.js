@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { auth, db } from '../configs/Config'; 
 import countryCodes from '../utils/CountryCode.json';
 
-const SignupForm = ({onSwitchToLogin }) => {
+const SignupForm = ({ onSwitchToLogin }) => {
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -19,6 +23,8 @@ const SignupForm = ({onSwitchToLogin }) => {
 
     const [countries, setCountries] = useState([]);
     const [allowedCountries, setAllowedCountries] = useState([]);
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setCountries(countryCodes);
@@ -40,11 +46,46 @@ const SignupForm = ({onSwitchToLogin }) => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const phoneNumberWithDialCode = `${formData.dialCode}${formData.phone}`;
-        const formDataToSubmit = { ...formData, phone: phoneNumberWithDialCode };
-        console.log(formDataToSubmit);
+        setError(null); // Reset error message
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            const user = userCredential.user;
+
+            // Prepare data to be saved to Firestore
+            const userData = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                phone: `${formData.dialCode}${formData.phone}`,
+                email: formData.email,
+                country: formData.country,
+                address1: formData.address1,
+                address2: formData.address2,
+                city: formData.city,
+                zip: formData.zip,
+                uid: user.uid
+            };
+
+            if(userData.country === "United States"){
+                userData['state'] = formData.state
+            }
+
+            
+
+            // Save user data to Firestore
+            await setDoc(doc(db, 'users', user.uid), userData);
+
+            console.log('User signed up and data saved to Firestore:', userData);
+            navigate('/'); // Navigate to the home page
+        } catch (error) {
+            if (error.code === 'auth/email-already-in-use') {
+                setError('The email address is already in use by another account.');
+            } else {
+                setError('An error occurred during sign up. Please try again.');
+            }
+            console.error('Error signing up:', error);
+        }
     };
 
     return (
@@ -52,6 +93,7 @@ const SignupForm = ({onSwitchToLogin }) => {
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
                 <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
                 <form onSubmit={handleSubmit}>
+                    {error && <div className="text-red-500 mb-4">{error}</div>}
                     <div className="flex flex-wrap -mx-2 mb-4">
                         <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
                             <label className="block text-gray-700 mb-2" htmlFor="firstName">First Name</label>
@@ -193,7 +235,7 @@ const SignupForm = ({onSwitchToLogin }) => {
                     </div>
                     {formData.country === 'United States' && (
                         <div className="mb-4">
-                            <label className="block text-gray-700 mb-2" htmlFor="state">State/Province</label>
+                            <label className="block text-gray-700 mb-2" htmlFor="state">State</label>
                             <input
                                 type="text"
                                 id="state"
@@ -206,7 +248,7 @@ const SignupForm = ({onSwitchToLogin }) => {
                         </div>
                     )}
                     <div className="mb-4">
-                        <label className="block text-gray-700 mb-2" htmlFor="zip">Zip/Postal Code/Block</label>
+                        <label className="block text-gray-700 mb-2" htmlFor="zip">ZIP Code</label>
                         <input
                             type="text"
                             id="zip"
@@ -217,16 +259,16 @@ const SignupForm = ({onSwitchToLogin }) => {
                             required
                         />
                     </div>
-                    <div className="mb-6">
-                        <button type="submit" className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">Sign Up</button>
-                    </div>
-                    <div className="text-center">
-                        <p className="text-gray-700">
-                            Already have an account? <span onClick={onSwitchToLogin} className="text-blue-500 hover:underline cursor-pointer">Login</span>
-                        </p>
-                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+                    >
+                        Sign Up
+                    </button>
+                    <p className="mt-4 text-center text-gray-600">
+                        Already have an account? <button onClick={onSwitchToLogin} className="text-blue-500 hover:underline">Log In</button>
+                    </p>
                 </form>
-
             </div>
         </div>
     );
