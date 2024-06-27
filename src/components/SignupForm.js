@@ -24,6 +24,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
     const [countries, setCountries] = useState([]);
     const [allowedCountries, setAllowedCountries] = useState([]);
     const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -49,6 +50,8 @@ const SignupForm = ({ onSwitchToLogin }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null); // Reset error message
+        setLoading(true); // Set loading to true
+
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             const user = userCredential.user;
@@ -66,12 +69,9 @@ const SignupForm = ({ onSwitchToLogin }) => {
                 zip: formData.zip,
                 uid: user.uid
             };
-
-            if(userData.country === "United States"){
-                userData['state'] = formData.state
+            if(userData.state === "United States"){
+                userData['state'] = formData.state;
             }
-
-            
 
             // Save user data to Firestore
             await setDoc(doc(db, 'users', user.uid), userData);
@@ -85,6 +85,8 @@ const SignupForm = ({ onSwitchToLogin }) => {
                 setError('An error occurred during sign up. Please try again.');
             }
             console.error('Error signing up:', error);
+        } finally {
+            setLoading(false); // Set loading to false
         }
     };
 
@@ -94,6 +96,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
                 <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
                 <form onSubmit={handleSubmit}>
                     {error && <div className="text-red-500 mb-4">{error}</div>}
+                    {loading && <div className="text-blue-500 mb-4">Signing up...</div>}
                     <div className="flex flex-wrap -mx-2 mb-4">
                         <div className="w-full md:w-1/2 px-2 mb-4 md:mb-0">
                             <label className="block text-gray-700 mb-2" htmlFor="firstName">First Name</label>
@@ -262,8 +265,9 @@ const SignupForm = ({ onSwitchToLogin }) => {
                     <button
                         type="submit"
                         className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-200"
+                        disabled={loading} // Disable button while loading
                     >
-                        Sign Up
+                        {loading ? 'Signing up...' : 'Sign Up'}
                     </button>
                     <p className="mt-4 text-center text-gray-600">
                         Already have an account? <button onClick={onSwitchToLogin} className="text-blue-500 hover:underline">Log In</button>
