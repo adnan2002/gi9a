@@ -1,16 +1,12 @@
 // src/components/Header.js
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom'; // Assuming you're using React Router for navigation
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faUser, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-
+import { useSelector } from 'react-redux';
 const Header = () => {
-  const [cartCount, setCartCount] = useState(0);
   const navigate = useNavigate();
-
-  const handleCartClick = () => {
-    setCartCount(cartCount + 1);
-  };
+  const cartCount = useSelector((state)=> state.cart.count);
 
   return (
     <header>
@@ -54,7 +50,9 @@ const Header = () => {
         <FontAwesomeIcon
             icon={faShoppingCart}
             className="text-gray-700 hover:text-blue-500 cursor-pointer transition duration-300 text-2xl"
-            onClick={handleCartClick}
+            onClick={()=>{
+              navigate('/cart')
+            }}
         />
             {cartCount > 0 && (
               <span className="absolute top-0 right-0 left-4 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center select-none">

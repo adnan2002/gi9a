@@ -4,11 +4,14 @@ import { db } from '../configs/Config';
 import { getDocs, collection, query, where } from 'firebase/firestore';
 import ShopBanner from '../components/ShopBanner';
 import ProductForm from '../components/ProductForm';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../redux/actions/CartActions';
 const Product = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -36,8 +39,9 @@ const Product = () => {
   }, [id]);
 
   const handleFormSubmit = (data) => {
+    data['productId'] = id;
     console.log('Form submitted with data:', data);
-    // Handle the form submission data as needed
+    dispatch(addToCart());
   };
 
   if (loading) {
@@ -50,20 +54,20 @@ const Product = () => {
 
   return (
     <div>
-    <ShopBanner title={"Create a Story"} />
-    {product && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-        <div className="flex justify-center items-center">
-          <img src={product.image} alt={product.title} className="w-full h-auto max-w-lg rounded-lg" />
+      <ShopBanner title="Create a Story" />
+      {product && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+          <div className="flex justify-center items-center">
+            <img src={product.image} alt={product.title} className="w-full h-auto max-w-lg rounded-lg" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold mb-4">{product.title}</h2>
+            <ProductForm onSubmit={handleFormSubmit} />
+            <p className="text-lg font-bold mb-4 mt-4">{product.price.toFixed(2)} SAR</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-3xl font-bold mb-4">{product.title}</h2>
-          <ProductForm onSubmit={handleFormSubmit} />
-          <p className='text-lg font-bold mb-4 mt-4'>{product.price.toFixed(2)} SAR</p>
-        </div>
-      </div>
-    )}
-  </div>
+      )}
+    </div>
   );
 };
 

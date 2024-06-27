@@ -5,6 +5,7 @@ import UserRegistration from "./pages/UserRegistration";
 import ForgotPassword from "./pages/ForgotPassword";
 import Footer from "./components/Footer";
 import Product from "./pages/Product";
+import Cart from "./pages/Cart";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="/registration" element={<UserRegistration />} />
             <Route path="/forgot" element={<ForgotPassword />} />
             <Route path="/shop/:id" element={<Product />} />
+            <Route path="/cart" element={<Cart/>}/>
             {/* <Route path="/404" component={NotFound} />
             <Redirect to="/404" /> */}
           </Routes>
