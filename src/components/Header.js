@@ -6,7 +6,10 @@ import { faSearch, faUser, faShoppingCart } from '@fortawesome/free-solid-svg-ic
 import { useSelector } from 'react-redux';
 const Header = () => {
   const navigate = useNavigate();
-  const cartCount = useSelector((state)=> state.cart.count);
+  const cartCount = useSelector((state) => {
+    const products = state.cart?.products ?? [];
+    return products.reduce((total, product) => total + product.quantity, 0);
+  });
 
   return (
     <header>

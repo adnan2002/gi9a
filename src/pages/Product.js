@@ -40,8 +40,9 @@ const Product = () => {
 
   const handleFormSubmit = (data) => {
     data['productId'] = id;
+    const productKey = JSON.stringify(data);
     console.log('Form submitted with data:', data);
-    dispatch(addToCart());
+    dispatch(addToCart({ ...data, key: productKey }));
   };
 
   if (loading) {

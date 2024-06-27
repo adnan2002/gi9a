@@ -1,24 +1,28 @@
+// src/reducers/cartReducer.js
 const initialState = {
-    count: 0,
-    error: null,
-  };
-  
-  const cartReducer = (state = initialState, action) => {
-    switch (action.type) {
-      case 'ADD_TO_CART_SUCCESS':
-        return {
-          ...state,
-          count: state.count + 1,
-        };
-      case 'ADD_TO_CART_FAILURE':
-        return {
-          ...state,
-          error: action.payload,
-        };
-      default:
-        return state;
-    }
-  };
-  
-  export default cartReducer;
-  
+  products: []
+};
+
+const cartReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'ADD_TO_CART':
+      return {
+        ...state,
+        products: [...state.products, action.payload]
+      };
+    case 'UPDATE_CART':
+      return {
+        ...state,
+        products: action.payload
+      };
+    case 'REMOVE_FROM_CART':
+      return {
+        ...state,
+        products: state.products.filter(product => product.key !== action.payload)
+      };
+    default:
+      return state;
+  }
+};
+
+export default cartReducer;
