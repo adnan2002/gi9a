@@ -1,8 +1,10 @@
+import SignOutButton from "../components/SignOutButton"
+
 const Home = ()=>{
     return (
-        <h1 className="text-3xl font-bold underline">
-        Hello world!
-        </h1>
+        <div>
+            <SignOutButton/>
+        </div>
     )
 }
 

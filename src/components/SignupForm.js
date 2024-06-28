@@ -58,8 +58,7 @@ const SignupForm = ({ onSwitchToLogin }) => {
 
             // Prepare data to be saved to Firestore
             const userData = {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
+                displayName: `${formData.firstName} ${formData.lastName}`,
                 phone: `${formData.dialCode}${formData.phone}`,
                 email: formData.email,
                 country: formData.country,

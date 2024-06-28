@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../configs/Config'; // Ensure you have the correct path to your firebase.js
+import { auth, db } from '../configs/Config'; // Ensure you have the correct path to your firebaseConfig.js
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
+import { setDoc, doc, getDocs, query, where, collection } from 'firebase/firestore';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
-const LoginForm = ({ onSwitchToSignup }) => {
+const LoginForm = ({ onSwitchToSignup, onSwitchToForgotPassword }) => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [googleSignInResult, setGoogleSignInResult] = useState(null);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -24,13 +26,13 @@ const LoginForm = ({ onSwitchToSignup }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null); // Reset error message
-        setLoading(true); // Set loading to true
+        setError(null);
+        setLoading(true);
 
         try {
             await signInWithEmailAndPassword(auth, formData.email, formData.password);
             console.log('User logged in successfully');
-            navigate('/'); // Navigate to the home page
+            navigate('/');
         } catch (error) {
             if (error.code === 'auth/invalid-password') {
                 setError('Incorrect password.');
@@ -41,7 +43,44 @@ const LoginForm = ({ onSwitchToSignup }) => {
             }
             console.error('Error logging in:', error);
         } finally {
-            setLoading(false); // Set loading to false
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        const provider = new GoogleAuthProvider();
+        setError(null);
+    
+        try {
+            // Query Firestore to check if the email already exists
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+    
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('email', '==', user.email));
+            const querySnapshot = await getDocs(q);
+    
+            if (!querySnapshot.empty) {
+                // If email already exists, set error and do not proceed
+                setError('An account with this email already exists.');
+                return;
+            }
+    
+            // If email does not exist, proceed to save user data in Firestore
+            await setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                signedInUsingGoogle: true
+            });
+    
+            setGoogleSignInResult(user);
+            console.log(googleSignInResult)
+            navigate('/');
+            console.log('Google sign-in successful:', user);
+        } catch (error) {
+            setError('An error occurred during Google sign-in. Please try again.');
+            console.error('Error during Google sign-in:', error);
         }
     };
 
@@ -76,13 +115,16 @@ const LoginForm = ({ onSwitchToSignup }) => {
                         />
                     </div>
                     <div className="mb-4 text-right">
-                        <Link to="/forgot" className="text-blue-500 hover:underline cursor-pointer">Forgot Password?</Link>
+                        <span onClick={onSwitchToForgotPassword} className="text-blue-500 hover:underline cursor-pointer">Forgot Password?</span>
                     </div>
-                    <div className='mb-6'>
+                    <div className="mb-6">
                         <button
+                            type="button"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center w-full"
+                            onClick={handleGoogleSignIn}
+                            disabled={loading}
                         >
-                            <FontAwesomeIcon icon={faGoogle} size='xl' className='pr-3'/>
+                            <FontAwesomeIcon icon={faGoogle} size="xl" className="pr-3" />
                             Sign in with Google
                         </button>
                     </div>
@@ -90,7 +132,7 @@ const LoginForm = ({ onSwitchToSignup }) => {
                         <button
                             type="submit"
                             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
-                            disabled={loading} // Disable button while loading
+                            disabled={loading}
                         >
                             {loading ? 'Logging in...' : 'Login'}
                         </button>
