@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../configs/Config'; 
 import countryCodes from '../utils/CountryCode.json';
+import { saveUserToLocalStorage } from '../utils/LocalStorageUtils';
 
 const SignupForm = ({ onSwitchToLogin }) => {
     const [formData, setFormData] = useState({
@@ -47,15 +48,21 @@ const SignupForm = ({ onSwitchToLogin }) => {
         });
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null); // Reset error message
         setLoading(true); // Set loading to true
-
+    
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             const user = userCredential.user;
-
+    
+            // Update the user's profile with displayName
+            await updateProfile(user, {
+                displayName: `${formData.firstName} ${formData.lastName}`
+            });
+    
             // Prepare data to be saved to Firestore
             const userData = {
                 displayName: `${formData.firstName} ${formData.lastName}`,
@@ -68,13 +75,16 @@ const SignupForm = ({ onSwitchToLogin }) => {
                 zip: formData.zip,
                 uid: user.uid
             };
-            if(userData.state === "United States"){
+            if (formData.country === "United States") {
                 userData['state'] = formData.state;
             }
-
+    
             // Save user data to Firestore
             await setDoc(doc(db, 'users', user.uid), userData);
+            delete userData['uid'];
+            saveUserToLocalStorage(userData);
 
+    
             console.log('User signed up and data saved to Firestore:', userData);
             navigate('/'); // Navigate to the home page
         } catch (error) {

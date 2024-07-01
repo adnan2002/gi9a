@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {  useState } from 'react';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../configs/Config'; // Ensure you have the correct path to your firebaseConfig.js
@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import { Link } from 'react-router-dom';
 import { setDoc, doc, getDocs, query, where, collection } from 'firebase/firestore';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { getUserById, saveUserToLocalStorage } from '../utils/LocalStorageUtils';
 
 const LoginForm = ({ onSwitchToSignup, onSwitchToForgotPassword }) => {
     const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ const LoginForm = ({ onSwitchToSignup, onSwitchToForgotPassword }) => {
     const [loading, setLoading] = useState(false);
     const [googleSignInResult, setGoogleSignInResult] = useState(null);
     const navigate = useNavigate();
+
 
     const handleChange = (e) => {
         setFormData({
@@ -30,8 +32,10 @@ const LoginForm = ({ onSwitchToSignup, onSwitchToForgotPassword }) => {
         setLoading(true);
 
         try {
-            await signInWithEmailAndPassword(auth, formData.email, formData.password);
-            console.log('User logged in successfully');
+            const userAuth = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            const userCred = await getUserById(userAuth?.user?.uid);
+            delete userCred['uid'];
+            saveUserToLocalStorage(userCred);
             navigate('/');
         } catch (error) {
             if (error.code === 'auth/invalid-password') {

@@ -2,12 +2,14 @@
 import React from 'react';
 import { auth } from '../configs/Config';
 import { signOut } from 'firebase/auth';
+import { removeUserFromLocalStorage } from '../utils/LocalStorageUtils';
 
 const SignOutButton = () => {
     let error = "";
   const handleSignOut = () => {
     signOut(auth).then(() => {
       console.log("User signed out successfully.");
+      removeUserFromLocalStorage();
     }).catch((error) => {
       console.error("Error signing out: ", error);
       error = error.toString();
